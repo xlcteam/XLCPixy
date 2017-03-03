@@ -15,7 +15,7 @@ public:
     XLCPixy(uint16_t arg=PIXY_DEFAULT_ARGVAL);
 
     uint16_t getBlocks(uint16_t maxBlocks=XLCPIXY_BLOCKS_COUNT,
-                       uint32_t maxDeltaTime=XLCPIXY_MAX_NO_DATA_TIME);
+                       uint32_t maxNoDataTime=XLCPIXY_MAX_NO_DATA_TIME);
     int8_t setServos(uint16_t s0, uint16_t s1);
     int8_t setBrightness(uint8_t brightness);
     int8_t setLED(uint8_t r, uint8_t g, uint8_t b);
@@ -29,7 +29,7 @@ public:
 
 
 private:
-    boolean getStart(uint32_t maxDeltaTime);
+    boolean getStart(uint32_t maxNoDataTime);
 
     LinkType link;
     BlockType blockType;
@@ -112,11 +112,12 @@ XLCPixy<LinkType>::getBlocks(uint16_t maxBlocks, uint32_t maxNoDataTime)
     for(blockCount=0; blockCount<maxBlocks;)
     {
         checksum = link.getWord();
-#if XPCPIXY_DBG == 1
+#if XLCPIXY_DBG == 1
         buffer[buffer_i] = checksum;
         buffer_i = (buffer_i + 1) % XLCPIXY_DBG_BUFF_SIZE;
 #endif
-        if (checksum==PIXY_START_WORD) // beginning of the next frame
+        // If we reach next frame, restart parsing blocks
+        if (checksum==PIXY_START_WORD)
         {
             blockCount = 0;
             blockType = NORMAL_BLOCK;
